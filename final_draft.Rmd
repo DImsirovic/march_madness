@@ -1,10 +1,12 @@
 ---
 title: "On Performance Metrics of Seeded and Non-Seeded March Madness Teams"
-subtitle: "STATS 406"
 author: "Dinko Imsirovic"
-output: 
-    pdf_document:
-fontsize: "12pt"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: null
+subtitle: STATS 406
+fontsize: 12pt
 ---
 
 ```{r setup, echo=FALSE, include=FALSE}
@@ -82,6 +84,7 @@ ggplot(data = ncaa_data, aes(x = OppARate, fill = as.factor(Seeded))) + geom_his
          y = "Count", 
          fill = "Seeded", 
          caption = "Figure 1") 
+ggsave("opp_assist_rate.png")
 ```
 
 ```{r echo=FALSE, fig.height=5.5, fig.width=8, message=FALSE, warning=FALSE}
@@ -94,6 +97,7 @@ ggplot(data = ncaa_data, aes(x = FG3Pct, fill = as.factor(Seeded))) + geom_histo
          y = "Count", 
          fill = "Seeded", 
          caption = "Figure 2")
+ggsave("three_pt_fg.png")
 ```
 
 We can see that the distribution of both of these metrics are approximately normal and when colored by seeded versus non-seeded, there does seem to be a shift in distributions according to our anticipation. This matches intuition: if an opposing team has a lower assist rate, then pass opportunities are being minimized and the defense is more effective. More effective defenses are naturally common in the national tournament. This also holds for higher 3 point field goal percentage: tournament teams are likely to be better 3 point shooters than non-tournament teams.
@@ -127,12 +131,12 @@ mean_diff <- function(data, label) {
     mean(data[label]) - mean(data[!label])
 }
 
-sample_data <- rnorm(3500, mean = 50, sd = 5)
+sample_data <- rnorm(3500, mean = 34, sd = 3)
 labeled_null <- as.data.frame(sample_data) %>% 
     mutate(seeded = ifelse(runif(3500, 0, 1) < 0.2, T, F))
 
 # Now I have a null distribution of test statistic
-test_dist <- replicate(5000, {
+test_dist <- replicate(3500, {
     # Shuffle
     permutations <- sample(labeled_null$seeded)
     # Compute test statistic
@@ -159,14 +163,14 @@ The 95% confidence interval for the estimated size of our permutation test is (0
 To investigate power, we generate samples of data representative of 3 point field goal percentage $(\propto N(37, 10))$where one subset has an induced mean shift and the other does not. Specifically, we generate 80% of our data with a shift, simulating seeded teams that do in fact have higher mean 3 point field goal percentage and the remaining 20% are untouched. We then calculate what proportion of the time we reject the null hypothesis when it is in fact not true with differing shift values and gather estimates of power in those respective situations. Our corresponding power curve is shown below:
 ```{r echo=FALSE}
 test_mean <- function(null_dist, mu) {
-    values <- mu + rnorm(3500 * 0.8, mean = 37, sd = 10)
+    values <- mu + rnorm(3500 * 0.8, mean = 34, sd = 3)
     not_seeded <- data.frame(values) %>% mutate(seeded = FALSE)
     
-    values <- rnorm(3500 * 0.2, mean = 37, sd = 10)
+    values <- rnorm(3500 * 0.2, mean = 34, sd = 3)
     seeded <- data.frame(values) %>% mutate(seeded = TRUE)
     
-    sim_adjEM <- rbind(seeded, not_seeded)
-    obs_diff <- mean_diff(sim_adjEM$values, sim_adjEM$seeded)
+    sim_3pt <- rbind(seeded, not_seeded)
+    obs_diff <- mean_diff(sim_3pt$values, sim_3pt$seeded)
     2 * min(mean(null_dist <= obs_diff), mean(null_dist >= obs_diff))
 }
 
@@ -177,12 +181,12 @@ test_power <- function(null_dist, mu) {
 }
 
 
-diffs <- seq(from = 0, to = 3, length.out = 20)
+diffs <- seq(from = 0, to = 1.5, length.out = 20)
 powers <- rep(0, 20)
-for(i in 1:length(powers)) {
+for(i in 1:length(diffs)) {
     powers[i] <- test_power(test_dist, diffs[i])
 }
-# powers
+diffs[which(powers >= 0.95)]
 ```
 
 ```{r echo=FALSE, fig.width=8, fig.height=5.5}
@@ -191,7 +195,9 @@ ggplot(data.frame(diffs, powers), aes(x = diffs, y = powers)) + geom_point() +
     labs(title = "Permutation Test Power by Mean Difference", 
          x = "Mean Difference", 
          y = "Power",
-         caption = "Figure 3")
+         caption = "Figure 3") + 
+    geom_text(aes(x=0.25, y=0.975), label="95% power", colour="deepskyblue3")
+ggsave("power_curve.png")
 ```
 We can see from the graph above that a mean difference of approximately 1.2 will ensure a power of at least 95%. In other words, if our observed mean difference in 3 point field goal percentage is at least 1.2, then the probability of rejecting the null hypothesis when it is not true is at least 95%.
 
@@ -222,6 +228,7 @@ ggplot(data.frame(dist.t.3), aes(x = dist.t.3)) + geom_density(fill = "deepskybl
          x = "Mean Difference", 
          y = "Density", 
          caption = "Figure 4")
+ggsave("permute_3pt.png")
 
 dist.t <- replicate(10000, {
     permuted_label <- sample(ncaa_data$Seeded)
@@ -235,6 +242,7 @@ ggplot(data.frame(dist.t), aes(x = dist.t)) + geom_density(fill = "deepskyblue3"
          x = "Mean Difference", 
          y = "Density", 
          caption = "Figure 5")
+ggsave("permute_opp.png")
 
 2 * min(mean(dist.t.3 <= obs_diff_3), mean(dist.t.3 >= obs_diff_3))
 2 * min(mean(dist.t <= obs_diff), mean(dist.t >= obs_diff))
@@ -263,6 +271,7 @@ opp_assist_ci <- boot(ncaa_data, statistic = mean_diff, strata = ncaa_data$Seede
 boot.ci(boot.out=opp_assist_ci, type="basic")
 ```
 These results show that with 95% confidence, we estimate the true difference of means for 3 point field goal percentage and opponents' assist rate for seeded and non-seeded teams to be within (-11.526, -0.253) and (4.939, 24.881), respectively. Because neither of these intervals contain 0, we can confidently conclude that the mean difference of 3 point field goal percentage and opponents' assist rate for seeded and non-seeded teams is no 0 and therefore the distributions for these metrics are indeed different for seeded and non-seeded teams.
+
 
 \newpage
 Discussion
