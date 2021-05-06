@@ -37,4 +37,5 @@ Since we've identified that the distributions are different we can move to appro
 We could also build and compare a variety of classification models (SVM, Logistic Regression, Random Forest, KNN, etc) to predict if a team will receive a seed for
 March Madness given performance metrics in the regular season.
 
-> Finally, a very special thanks to Alex, Julian, and Elton for their help and feedback in making this possible.
+---
+*Finally, a very special thanks to Alex, Julian, and Elton for their help and feedback in making this possible.*
