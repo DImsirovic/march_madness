@@ -4,7 +4,7 @@
 In this project, we analyze differences in performance metrics for collegiate basketball teams that have qualified for March Madness versus those that have not using a variety of Monte Carlo Simulation methods in R. 
 
 ## Medium Article
-![Here you can find a more thorough and in-depth discussion about this work in a published Medium article.](https://github.com/DImsirovic/march_madness).
+![Here you can find a more thorough and in-depth discussion about this work in a published Medium article.](https://github.com/DImsirovic/march_madness)
 
 ## Brief Executive Overview
 ### Intro
