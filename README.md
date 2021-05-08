@@ -38,4 +38,4 @@ We could also build and compare a variety of classification models (SVM, Logisti
 March Madness given performance metrics in the regular season.
 
 ---
-*Finally, a very special thanks to Alex, Julian, and Elton for their help and feedback in making this possible.*
+*A very special thanks to Alex, Julian, and Elton for their help and feedback in making this possible.*
