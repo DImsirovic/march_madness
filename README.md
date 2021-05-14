@@ -36,6 +36,3 @@ conclude that the distribution of 3 point field goal percentage for seeded versu
 Since we've identified that the distributions are different we can move to approximate these distributions with ![resampling techniques](https://en.wikipedia.org/wiki/Rejection_sampling).
 We could also build and compare a variety of classification models (SVM, Logistic Regression, Random Forest, KNN, etc) to predict if a team will receive a seed for
 March Madness given performance metrics in the regular season.
-
----
-*A very special thanks to Alex, Julian, and Elton for their help and feedback in making this possible.*
